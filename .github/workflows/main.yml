@@ -6,25 +6,25 @@ on:
     branches: [ main, "*" ]
 
 jobs:
-    determine_branch:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: Set Branch Name as Environment Variable
-        id: set_branch_name
-        run: echo "BRANCH_NAME=${{ github.ref }}" >> $GITHUB_ENV
-      - name: Determine Service Name
-        id: determine_service_name
-        run:
-          # Extract the branch name from BRANCH_NAME
-          branch_name=${BRANCH_NAME#refs/heads/}
-          # Set the service name dynamically based on the branch name
-          echo "SERVICE_NAME=group4-${branch_name}" >> $GITHUB_ENV
-      - name: Deploy Serverless App
-        run:
-          # Now, you can use the SERVICE_NAME environment variable
-          sls deploy --stage $SERVICE_NAME
+  determine_branch:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    - name: Set Branch Name as Environment Variable
+      id: set_branch_name
+      run: echo "BRANCH_NAME=${{ github.ref }}" >> $GITHUB_ENV
+    - name: Determine Service Name
+      id: determine_service_name
+      run:
+        # Extract the branch name from BRANCH_NAME
+        branch_name=${BRANCH_NAME#refs/heads/}
+        # Set the service name dynamically based on the branch name
+        echo "SERVICE_NAME=group4-${branch_name}" >> $GITHUB_ENV
+    - name: Deploy Serverless App
+      run:
+        # Now, you can use the SERVICE_NAME environment variable
+        sls deploy --stage $SERVICE_NAME
   deploy-dev:
     if: github.ref == 'refs/heads/dev'
     name: deploy to dev

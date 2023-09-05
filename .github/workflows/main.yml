@@ -8,23 +8,30 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repositpory code
-        uses: actions/checkout@v3
-      - name: Set Branch Name as Environment Variable
-        id: set_branch_name
-        run: echo "::set-output name=branch_name::$(echo $GITHUB_REF | sed 's/refs\/heads\///')"
-      - name: Determine Service Name
-        id: determine_service_name
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install Serverless Framework
+        run: npm install -g serverless
+
+      - name: Extract branch name
+        id: branch_name
+        run: echo "::set-output name=branch::$(echo $GITHUB_REF | sed 's/refs\/heads\///')"
+
+      - name: Deploy Serverless Application
+        env:
+          SERVICE_NAME: ${{ steps.branch_name.outputs.branch }}
         run: |
-          # Extract the branch name from BRANCH_NAME
-          branch_name=${BRANCH_NAME}
-          # Set the service name dynamically based on the branch name
-          echo "SERVICE_NAME=group4-${branch_name}" >> $GITHUB_ENV
-      - name: Deploy Serverless App
-        run: |
-          # Now, you can use the SERVICE_NAME environment variable
-          sls deploy --stage $SERVICE_NAME
+          cd serverless-app-directory
+          serverless deploy --stage $SERVICE_NAME
+
   deploy-dev:
     if: github.ref == 'refs/heads/dev'
     name: deploy to dev

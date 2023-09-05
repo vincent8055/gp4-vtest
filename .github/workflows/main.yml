@@ -13,12 +13,12 @@ jobs:
         uses: actions/checkout@v3
       - name: Set Branch Name as Environment Variable
         id: set_branch_name
-        run: echo "BRANCH_NAME=${{ github.ref }}" >> $GITHUB_ENV
+        run: echo "::set-output name=branch_name::$(echo $GITHUB_REF | sed 's/refs\/heads\///')"
       - name: Determine Service Name
         id: determine_service_name
         run:
           # Extract the branch name from BRANCH_NAME
-          branch_name=${BRANCH_NAME#refs/heads/}
+          branch_name=${BRANCH_NAME}
           # Set the service name dynamically based on the branch name
           echo "SERVICE_NAME=group4-${branch_name}" >> $GITHUB_ENV
       - name: Deploy Serverless App
@@ -34,20 +34,20 @@ jobs:
       matrix:
         node-version: [18.x]
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - name: serverless deploy
-      uses: serverless/github-action@v3.2
-      with:
-        args: deploy --stage dev
-      env:
-        DEPLOY_ENV: 'dev'
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: npm ci
+      - name: serverless deploy
+        uses: serverless/github-action@v3.2
+        with:
+          args: deploy --stage dev
+        env:
+          DEPLOY_ENV: 'dev'
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
   deploy-prod:
     if:  github.ref == 'refs/heads/prod'
